@@ -1,14 +1,14 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import { useParams } from 'react-router-dom';
-import axios from 'axios';
-import { Card } from '../components/common/Card';
-import { Button } from '../components/common/Button';
-import { Badge } from '../components/common/Badge';
-import { Modal } from '../components/common/Modal';
-import { GenesisLogo } from '../components/common/GenesisLogo';
-import { GenesisWatermark } from '../components/common/GenesisWatermark';
-import { GenesisStepper } from '../components/common/GenesisStepper';
-import { formatINR, formatDate, formatDateTime } from '../utils/formatters';
+import React, { useEffect, useState, useMemo } from "react";
+import { useParams } from "react-router-dom";
+import axios from "axios";
+import { Card } from "../components/common/Card";
+import { Button } from "../components/common/Button";
+import { Badge } from "../components/common/Badge";
+import { Modal } from "../components/common/Modal";
+import { GenesisLogo } from "../components/common/GenesisLogo";
+import { GenesisWatermark } from "../components/common/GenesisWatermark";
+import { GenesisStepper } from "../components/common/GenesisStepper";
+import { formatINR, formatDate, formatDateTime } from "../utils/formatters";
 import {
   CheckCircle2,
   Calendar,
@@ -26,11 +26,11 @@ import {
   FileEdit,
   Plus,
   Minus,
-} from 'lucide-react';
+} from "lucide-react";
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || "/api";
 
-import { DigitalAcceptance, DigitalApproval } from '../types';
+import { DigitalAcceptance, DigitalApproval } from "../types";
 
 interface CustomProgramItem {
   programId?: string;
@@ -38,7 +38,7 @@ interface CustomProgramItem {
   programName?: string;
   code?: string;
   hours: number;
-  pricingType: 'PER_STUDENT' | 'PER_HOUR' | 'FIXED';
+  pricingType: "PER_STUDENT" | "PER_HOUR" | "FIXED";
   rate?: number;
   unitRate?: number;
   calculatedCost?: number;
@@ -49,7 +49,7 @@ interface CustomProposalItemData {
   name: string;
   description?: string;
   quantity: number;
-  pricingType: 'PER_STUDENT' | 'PER_HOUR' | 'FIXED' | 'FLAT' | 'PER_UNIT';
+  pricingType: "PER_STUDENT" | "PER_HOUR" | "FIXED" | "FLAT" | "PER_UNIT";
   unitPrice: number;
   calculatedCost?: number;
   totalCost?: number;
@@ -59,7 +59,17 @@ interface PublicProposalData {
   id: string;
   proposalId: string;
   publicToken: string;
-  status: 'DRAFT' | 'SHARED' | 'VIEWED' | 'MODIFIED_BY_COLLEGE' | 'COLLEGE_MODIFIED' | 'PENDING_MANAGER_APPROVAL' | 'SUBMITTED' | 'APPROVED' | 'REJECTED' | 'EXPIRED';
+  status:
+    | "DRAFT"
+    | "SHARED"
+    | "VIEWED"
+    | "MODIFIED_BY_COLLEGE"
+    | "COLLEGE_MODIFIED"
+    | "PENDING_MANAGER_APPROVAL"
+    | "SUBMITTED"
+    | "APPROVED"
+    | "REJECTED"
+    | "EXPIRED";
   currentVersion: number;
   tokenExpiresAt: string;
   createdAt: string;
@@ -100,14 +110,14 @@ interface PublicProposalData {
     name: string;
     code: string;
     description: string;
-    pricingType: 'PER_STUDENT' | 'PER_HOUR' | 'FIXED';
+    pricingType: "PER_STUDENT" | "PER_HOUR" | "FIXED";
     price: number;
   }>;
   addonsTotalCost: number;
   customItems?: CustomProposalItemData[];
   customItemsTotalCost?: number;
   discountValue: number;
-  discountType: 'FIXED' | 'PERCENTAGE';
+  discountType: "FIXED" | "PERCENTAGE";
   subtotal?: number;
   taxableAmount?: number;
   costPerStudentBeforeGst?: number;
@@ -130,24 +140,28 @@ interface PublicProposalData {
 export const PublicProposalViewPage: React.FC = () => {
   const { token } = useParams<{ token: string }>();
 
-  const [proposalData, setProposalData] = useState<PublicProposalData | null>(null);
+  const [proposalData, setProposalData] = useState<PublicProposalData | null>(
+    null,
+  );
   const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [errorMessage, setErrorMessage] = useState<string>('');
+  const [errorMessage, setErrorMessage] = useState<string>("");
 
   // Interactive adjustments
   const [studentCount, setStudentCount] = useState<number>(100);
   const [customPrograms, setCustomPrograms] = useState<CustomProgramItem[]>([]);
   const [selectedAddonIds, setSelectedAddonIds] = useState<string[]>([]);
-  const [collegeNotes, setCollegeNotes] = useState<string>('');
+  const [collegeNotes, setCollegeNotes] = useState<string>("");
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [submitSuccess, setSubmitSuccess] = useState<boolean>(false);
 
   // Digital Acceptance Confirmation Modal
-  const [isConfirmAcceptModalOpen, setIsConfirmAcceptModalOpen] = useState<boolean>(false);
+  const [isConfirmAcceptModalOpen, setIsConfirmAcceptModalOpen] =
+    useState<boolean>(false);
 
   // Request Changes Modal State
-  const [isRequestChangeOpen, setIsRequestChangeOpen] = useState<boolean>(false);
-  const [changeReason, setChangeReason] = useState<string>('');
+  const [isRequestChangeOpen, setIsRequestChangeOpen] =
+    useState<boolean>(false);
+  const [changeReason, setChangeReason] = useState<string>("");
   const [isRequestingChange, setIsRequestingChange] = useState<boolean>(false);
   const [changeError, setChangeError] = useState<string | null>(null);
   const [changeSuccess, setChangeSuccess] = useState<boolean>(false);
@@ -157,21 +171,25 @@ export const PublicProposalViewPage: React.FC = () => {
 
     const fetchProposal = async () => {
       try {
-        const res = await axios.get(`${API_BASE_URL}/public/proposals/${token}`);
+        const res = await axios.get(
+          `${API_BASE_URL}/public/proposals/${token}`,
+        );
         if (res.data.success) {
           const data: PublicProposalData = res.data.data;
           setProposalData(data);
           setStudentCount(data.studentCount);
           setCustomPrograms(data.customPrograms || []);
-          setSelectedAddonIds((data.selectedAddons || []).map((a) => a.addonId));
-          setCollegeNotes(data.collegeNotes || '');
+          setSelectedAddonIds(
+            (data.selectedAddons || []).map((a) => a.addonId),
+          );
+          setCollegeNotes(data.collegeNotes || "");
         }
       } catch (err: unknown) {
-        console.error('Failed to load proposal:', err);
+        console.error("Failed to load proposal:", err);
         const errObj = err as { response?: { data?: { message?: string } } };
         setErrorMessage(
           errObj.response?.data?.message ||
-            'Unable to access this proposal. The link may have expired or is invalid.'
+            "Unable to access this proposal. The link may have expired or is invalid.",
         );
       } finally {
         setIsLoading(false);
@@ -183,15 +201,19 @@ export const PublicProposalViewPage: React.FC = () => {
 
   const isCustomPlan = Boolean(
     (customPrograms && customPrograms.length > 0) ||
-    (proposalData?.customPrograms && proposalData.customPrograms.length > 0)
+    (proposalData?.customPrograms && proposalData.customPrograms.length > 0),
   );
 
   const isSubmitted =
-    proposalData?.status === 'PENDING_MANAGER_APPROVAL' ||
-    proposalData?.status === 'SUBMITTED' ||
-    proposalData?.status === 'MODIFIED_BY_COLLEGE';
-  const isApproved = proposalData?.status === 'APPROVED';
-  const isLocked = isSubmitted || isApproved || proposalData?.status === 'REJECTED' || proposalData?.status === 'EXPIRED';
+    proposalData?.status === "PENDING_MANAGER_APPROVAL" ||
+    proposalData?.status === "SUBMITTED" ||
+    proposalData?.status === "MODIFIED_BY_COLLEGE";
+  const isApproved = proposalData?.status === "APPROVED";
+  const isLocked =
+    isSubmitted ||
+    isApproved ||
+    proposalData?.status === "REJECTED" ||
+    proposalData?.status === "EXPIRED";
 
   const handleProgramHoursChange = (idx: number, newHours: number) => {
     if (isLocked) return;
@@ -213,26 +235,36 @@ export const PublicProposalViewPage: React.FC = () => {
 
     // 1. Base Training Cost
     let baseTrainingCost = 0;
-    let totalTrainingHours = proposalData.totalHours || proposalData.plan?.totalHours || 0;
-    const computedPrograms: Array<{ name: string; hours: number; unitRate: number; cost: number; pricingType: string }> = [];
+    let totalTrainingHours =
+      proposalData.totalHours || proposalData.plan?.totalHours || 0;
+    const computedPrograms: Array<{
+      name: string;
+      hours: number;
+      unitRate: number;
+      cost: number;
+      pricingType: string;
+    }> = [];
 
-    const activeCustomPrograms = customPrograms.length > 0 ? customPrograms : (proposalData.customPrograms || []);
+    const activeCustomPrograms =
+      customPrograms.length > 0
+        ? customPrograms
+        : proposalData.customPrograms || [];
 
     if (isCustomPlan && activeCustomPrograms.length > 0) {
       let customHoursSum = 0;
       for (const prog of activeCustomPrograms) {
         const pHours = prog.hours || 0;
         // CRITICAL RULE: Locked rate from proposal snapshot
-        const pRate = prog.rate !== undefined ? prog.rate : (prog.unitRate || 0);
-        const pType = prog.pricingType || 'PER_HOUR';
-        const pName = prog.name || prog.programName || 'Training Module';
+        const pRate = prog.rate !== undefined ? prog.rate : prog.unitRate || 0;
+        const pType = prog.pricingType || "PER_HOUR";
+        const pName = prog.name || prog.programName || "Training Module";
 
         customHoursSum += pHours;
 
         let pCost = 0;
-        if (pType === 'PER_STUDENT') {
+        if (pType === "PER_STUDENT") {
           pCost = pRate * count;
-        } else if (pType === 'FIXED') {
+        } else if (pType === "FIXED") {
           pCost = pRate;
         } else {
           // PER_HOUR: hours * rate * studentCount
@@ -260,9 +292,9 @@ export const PublicProposalViewPage: React.FC = () => {
     selectedAddonIds.forEach((addonId) => {
       const addon = available.find((a) => a.id === addonId);
       if (addon) {
-        if (addon.pricingType === 'PER_STUDENT') {
+        if (addon.pricingType === "PER_STUDENT") {
           addonsTotal += addon.price * count;
-        } else if (addon.pricingType === 'PER_HOUR') {
+        } else if (addon.pricingType === "PER_HOUR") {
           addonsTotal += addon.price * totalTrainingHours;
         } else {
           addonsTotal += addon.price;
@@ -272,16 +304,23 @@ export const PublicProposalViewPage: React.FC = () => {
 
     // 3. Custom Items Total
     let customItemsTotal = 0;
-    const computedCustomItems: Array<{ name: string; description?: string; unitPrice: number; calculatedCost: number; pricingType: string; quantity: number }> = [];
+    const computedCustomItems: Array<{
+      name: string;
+      description?: string;
+      unitPrice: number;
+      calculatedCost: number;
+      pricingType: string;
+      quantity: number;
+    }> = [];
     if (proposalData.customItems && proposalData.customItems.length > 0) {
       for (const ci of proposalData.customItems) {
-        const pType = ci.pricingType || 'PER_STUDENT';
+        const pType = ci.pricingType || "PER_STUDENT";
         const unitPrice = ci.unitPrice || 0;
         let itemCost = 0;
 
-        if (pType === 'PER_STUDENT') {
+        if (pType === "PER_STUDENT") {
           itemCost = unitPrice * count;
-        } else if (pType === 'PER_HOUR') {
+        } else if (pType === "PER_HOUR") {
           itemCost = unitPrice * totalTrainingHours;
         } else {
           itemCost = unitPrice * (ci.quantity || 1);
@@ -294,7 +333,7 @@ export const PublicProposalViewPage: React.FC = () => {
           unitPrice,
           calculatedCost: itemCost,
           pricingType: pType,
-          quantity: pType === 'PER_STUDENT' ? count : (ci.quantity || 1),
+          quantity: pType === "PER_STUDENT" ? count : ci.quantity || 1,
         });
       }
     }
@@ -302,8 +341,10 @@ export const PublicProposalViewPage: React.FC = () => {
     // 4. Subtotal & Discount
     const subtotal = baseTrainingCost + addonsTotal + customItemsTotal;
     let discountAmount = 0;
-    if (proposalData.discountType === 'PERCENTAGE') {
-      discountAmount = Math.round((subtotal * (proposalData.discountValue || 0)) / 100);
+    if (proposalData.discountType === "PERCENTAGE") {
+      discountAmount = Math.round(
+        (subtotal * (proposalData.discountValue || 0)) / 100,
+      );
     } else {
       discountAmount = proposalData.discountValue || 0;
     }
@@ -315,7 +356,8 @@ export const PublicProposalViewPage: React.FC = () => {
     const grandTotal = taxableAmount + gstAmount;
 
     // 6. Strict Single Per-Student Metric: Pre-GST
-    const costPerStudentBeforeGst = Math.round((taxableAmount / count) * 100) / 100;
+    const costPerStudentBeforeGst =
+      Math.round((taxableAmount / count) * 100) / 100;
 
     return {
       baseTrainingCost,
@@ -332,12 +374,20 @@ export const PublicProposalViewPage: React.FC = () => {
       grandTotal,
       costPerStudentBeforeGst,
     };
-  }, [proposalData, studentCount, selectedAddonIds, isCustomPlan, customPrograms]);
+  }, [
+    proposalData,
+    studentCount,
+    selectedAddonIds,
+    isCustomPlan,
+    customPrograms,
+  ]);
 
   const handleAddonToggle = (addonId: string) => {
     if (isLocked) return;
     setSelectedAddonIds((prev) =>
-      prev.includes(addonId) ? prev.filter((id) => id !== addonId) : [...prev, addonId]
+      prev.includes(addonId)
+        ? prev.filter((id) => id !== addonId)
+        : [...prev, addonId],
     );
   };
 
@@ -354,9 +404,12 @@ export const PublicProposalViewPage: React.FC = () => {
       });
 
       // Step 2: Final submission to manager review queue
-      const submitRes = await axios.post(`${API_BASE_URL}/public/proposals/${token}/submit`, {
-        collegeNotes,
-      });
+      const submitRes = await axios.post(
+        `${API_BASE_URL}/public/proposals/${token}/submit`,
+        {
+          collegeNotes,
+        },
+      );
 
       if (submitRes.data.success) {
         setSubmitSuccess(true);
@@ -366,19 +419,22 @@ export const PublicProposalViewPage: React.FC = () => {
           prev
             ? {
                 ...prev,
-                status: 'PENDING_MANAGER_APPROVAL',
+                status: "PENDING_MANAGER_APPROVAL",
                 studentCount,
                 customPrograms,
                 collegeNotes,
                 digitalAcceptance: acceptedRecord || prev.digitalAcceptance,
               }
-            : null
+            : null,
         );
       }
     } catch (err: unknown) {
-      console.error('Failed to submit proposal modifications:', err);
+      console.error("Failed to submit proposal modifications:", err);
       const errObj = err as { response?: { data?: { message?: string } } };
-      alert(errObj.response?.data?.message || 'Failed to submit proposal configuration. Please try again.');
+      alert(
+        errObj.response?.data?.message ||
+          "Failed to submit proposal configuration. Please try again.",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -390,9 +446,12 @@ export const PublicProposalViewPage: React.FC = () => {
     setIsRequestingChange(true);
     setChangeError(null);
     try {
-      const res = await axios.post(`${API_BASE_URL}/public/proposals/${token}/request-changes`, {
-        reason: changeReason.trim(),
-      });
+      const res = await axios.post(
+        `${API_BASE_URL}/public/proposals/${token}/request-changes`,
+        {
+          reason: changeReason.trim(),
+        },
+      );
       if (res.data.success) {
         setIsRequestChangeOpen(false);
         setChangeSuccess(true);
@@ -400,16 +459,19 @@ export const PublicProposalViewPage: React.FC = () => {
           prev
             ? {
                 ...prev,
-                status: 'COLLEGE_MODIFIED',
+                status: "COLLEGE_MODIFIED",
                 collegeNotes: changeReason.trim(),
               }
-            : null
+            : null,
         );
       }
     } catch (err: unknown) {
-      console.error('Failed to submit change request:', err);
+      console.error("Failed to submit change request:", err);
       const errObj = err as { response?: { data?: { message?: string } } };
-      setChangeError(errObj.response?.data?.message || 'Failed to submit change request. Please try again.');
+      setChangeError(
+        errObj.response?.data?.message ||
+          "Failed to submit change request. Please try again.",
+      );
     } finally {
       setIsRequestingChange(false);
     }
@@ -418,21 +480,29 @@ export const PublicProposalViewPage: React.FC = () => {
   const handleDownloadPdf = async () => {
     if (!token) return;
     try {
-      const response = await axios.get(`${API_BASE_URL}/public/proposals/${token}/pdf`, {
-        responseType: 'blob',
-      });
-      const blob = new Blob([response.data], { type: 'application/pdf' });
+      const response = await axios.get(
+        `${API_BASE_URL}/public/proposals/${token}/pdf`,
+        {
+          responseType: "blob",
+        },
+      );
+      const blob = new Blob([response.data], { type: "application/pdf" });
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', `Genesis-Proposal-${proposalData?.proposalId || 'Document'}.pdf`);
+      link.setAttribute(
+        "download",
+        `Genesis-Proposal-${proposalData?.proposalId || "Document"}.pdf`,
+      );
       document.body.appendChild(link);
       link.click();
       link.remove();
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Failed to download proposal PDF:', err);
-      alert('Unable to generate PDF document. Please try again or contact Genesis.');
+      console.error("Failed to download proposal PDF:", err);
+      alert(
+        "Unable to generate PDF document. Please try again or contact Genesis.",
+      );
     }
   };
 
@@ -440,7 +510,9 @@ export const PublicProposalViewPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-[#FAFAF7] flex flex-col items-center justify-center p-4">
         <div className="w-10 h-10 border-3 border-amber-500 border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="text-xs font-semibold text-neutral-600">Loading verified institutional proposal...</p>
+        <p className="text-xs font-semibold text-neutral-600">
+          Loading verified institutional proposal...
+        </p>
       </div>
     );
   }
@@ -452,9 +524,12 @@ export const PublicProposalViewPage: React.FC = () => {
           <div className="w-12 h-12 rounded-full bg-red-50 text-red-600 flex items-center justify-center mx-auto">
             <AlertCircle className="w-6 h-6" />
           </div>
-          <h2 className="text-lg font-bold text-neutral-900">Proposal Inaccessible</h2>
+          <h2 className="text-lg font-bold text-neutral-900">
+            Proposal Inaccessible
+          </h2>
           <p className="text-xs text-neutral-600 leading-relaxed">
-            {errorMessage || 'This proposal link is invalid or has expired. Please request an updated link from your Genesis BD representative.'}
+            {errorMessage ||
+              "This proposal link is invalid or has expired. Please request an updated link from your Genesis BD representative."}
           </p>
         </Card>
       </div>
@@ -533,8 +608,10 @@ export const PublicProposalViewPage: React.FC = () => {
               </h1>
 
               <p className="text-xs md:text-sm text-neutral-600 max-w-2xl leading-relaxed">
-                Tailored placement and recruitment training proposal for {proposalData.college?.city || 'Campus'}, {proposalData.college?.state || ''}.
-                Equipping students for tier-1 corporate recruitments.
+                Tailored placement and recruitment training proposal for{" "}
+                {proposalData.college?.city || "Campus"},{" "}
+                {proposalData.college?.state || ""}. Equipping students for
+                tier-1 corporate recruitments.
               </p>
             </div>
 
@@ -543,11 +620,13 @@ export const PublicProposalViewPage: React.FC = () => {
                 Authorized Plan
               </span>
               <span className="text-lg font-black text-neutral-900 mt-0.5">
-                {isCustomPlan ? 'Custom Modular Plan' : proposalData.plan?.name}
+                {isCustomPlan ? "Custom Modular Plan" : proposalData.plan?.name}
               </span>
               <span className="text-xs font-semibold text-amber-700 mt-1 flex items-center gap-1">
                 <Zap className="w-3.5 h-3.5" />
-                {livePricing?.totalTrainingHours || proposalData.totalHours} Hours Intensive Curriculum
+                {livePricing?.totalTrainingHours ||
+                  proposalData.totalHours}{" "}
+                Hours Intensive Curriculum
               </span>
             </div>
           </div>
@@ -558,9 +637,12 @@ export const PublicProposalViewPage: React.FC = () => {
           <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-900 flex items-center gap-3 animate-in fade-in">
             <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
             <div>
-              <p className="text-xs font-bold">Proposal Submitted Successfully</p>
+              <p className="text-xs font-bold">
+                Proposal Submitted Successfully
+              </p>
               <p className="text-[11px] text-emerald-700">
-                Your proposal has been sent to the Genesis team for final approval.
+                Your proposal has been sent to the Genesis team for final
+                approval.
               </p>
             </div>
           </div>
@@ -571,9 +653,12 @@ export const PublicProposalViewPage: React.FC = () => {
           <div className="p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 flex items-center gap-3 animate-in fade-in">
             <MessageSquare className="w-5 h-5 text-amber-600 flex-shrink-0" />
             <div>
-              <p className="text-xs font-bold">Change Request Sent Directly to Genesis BD Lead</p>
+              <p className="text-xs font-bold">
+                Change Request Sent Directly to Genesis BD Lead
+              </p>
               <p className="text-[11px] text-amber-800">
-                Your revision notes have been dispatched. Your dedicated Genesis representative will follow up promptly.
+                Your revision notes have been dispatched. Your dedicated Genesis
+                representative will follow up promptly.
               </p>
             </div>
           </div>
@@ -590,7 +675,9 @@ export const PublicProposalViewPage: React.FC = () => {
                   <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-800">
                     <Layers className="w-4 h-4" />
                   </div>
-                  <h2 className="text-sm font-bold text-neutral-900">Student Cohort Sizing</h2>
+                  <h2 className="text-sm font-bold text-neutral-900">
+                    Student Cohort Sizing
+                  </h2>
                 </div>
                 {!isLocked && (
                   <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 bg-emerald-50 px-2.5 py-0.5 rounded-full border border-emerald-200">
@@ -602,7 +689,8 @@ export const PublicProposalViewPage: React.FC = () => {
               {!isLocked ? (
                 <div className="space-y-4 pt-1">
                   <p className="text-xs text-neutral-600">
-                    Adjust the expected student batch size below. Live commercial investment calculations update in real time.
+                    Adjust the expected student batch size below. Live
+                    commercial investment calculations update in real time.
                   </p>
                   <GenesisStepper
                     value={studentCount}
@@ -615,7 +703,9 @@ export const PublicProposalViewPage: React.FC = () => {
                 </div>
               ) : (
                 <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-between">
-                  <span className="text-xs font-semibold text-neutral-600">Enrolled Student Cohort</span>
+                  <span className="text-xs font-semibold text-neutral-600">
+                    Enrolled Student Cohort
+                  </span>
                   <span className="font-mono text-base font-black text-neutral-900">
                     {studentCount} Students
                   </span>
@@ -633,7 +723,7 @@ export const PublicProposalViewPage: React.FC = () => {
                   <h2 className="text-sm font-bold text-neutral-900">
                     {isCustomPlan
                       ? `Custom Plan Architecture (${livePricing?.totalTrainingHours || proposalData.totalHours} hrs)`
-                      : 'Curriculum Scope & Training Modules'}
+                      : "Curriculum Scope & Training Modules"}
                   </h2>
                 </div>
                 {isCustomPlan && (
@@ -653,9 +743,14 @@ export const PublicProposalViewPage: React.FC = () => {
                       <div className="flex items-center gap-2.5">
                         <div className="w-2 h-2 rounded-full bg-amber-500 shrink-0" />
                         <div>
-                          <span className="font-bold text-neutral-900 block">{prog.name}</span>
+                          <span className="font-bold text-neutral-900 block">
+                            {prog.name}
+                          </span>
                           <span className="text-[10px] text-amber-800 font-mono font-medium">
-                            {prog.pricingType === 'PER_STUDENT' ? `₹${prog.unitRate}/std` : `₹${prog.unitRate}/hr`} (Locked Rate)
+                            {prog.pricingType === "PER_STUDENT"
+                              ? `₹${prog.unitRate}/std`
+                              : `₹${prog.unitRate}/hr`}{" "}
+                            (Locked Rate)
                           </span>
                         </div>
                       </div>
@@ -665,7 +760,9 @@ export const PublicProposalViewPage: React.FC = () => {
                           <div className="flex items-center gap-1 bg-white border border-neutral-300 rounded-lg p-0.5 shadow-2xs">
                             <button
                               type="button"
-                              onClick={() => handleProgramHoursChange(idx, prog.hours - 5)}
+                              onClick={() =>
+                                handleProgramHoursChange(idx, prog.hours - 5)
+                              }
                               disabled={prog.hours <= 1}
                               className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:bg-neutral-100 disabled:opacity-30 disabled:cursor-not-allowed font-bold"
                               title="Decrease 5 Hours"
@@ -677,13 +774,22 @@ export const PublicProposalViewPage: React.FC = () => {
                               min="1"
                               max="500"
                               value={prog.hours}
-                              onChange={(e) => handleProgramHoursChange(idx, parseInt(e.target.value) || 1)}
+                              onChange={(e) =>
+                                handleProgramHoursChange(
+                                  idx,
+                                  parseInt(e.target.value) || 1,
+                                )
+                              }
                               className="w-12 text-center font-mono font-bold text-xs bg-transparent focus:outline-none"
                             />
-                            <span className="text-[10px] text-neutral-500 font-semibold pr-1">hrs</span>
+                            <span className="text-[10px] text-neutral-500 font-semibold pr-1">
+                              hrs
+                            </span>
                             <button
                               type="button"
-                              onClick={() => handleProgramHoursChange(idx, prog.hours + 5)}
+                              onClick={() =>
+                                handleProgramHoursChange(idx, prog.hours + 5)
+                              }
                               className="w-6 h-6 flex items-center justify-center rounded text-neutral-700 hover:bg-neutral-100 font-bold"
                               title="Increase 5 Hours"
                             >
@@ -691,7 +797,9 @@ export const PublicProposalViewPage: React.FC = () => {
                             </button>
                           </div>
                         ) : (
-                          <span className="font-mono text-neutral-600 font-bold">{prog.hours} hrs</span>
+                          <span className="font-mono text-neutral-600 font-bold">
+                            {prog.hours} hrs
+                          </span>
                         )}
 
                         <span className="font-mono font-bold text-neutral-900 shrink-0 min-w-[75px] text-right">
@@ -701,7 +809,10 @@ export const PublicProposalViewPage: React.FC = () => {
                     </div>
                   ))}
                   <div className="pt-2 border-t border-neutral-200 flex justify-between items-center text-xs font-bold text-neutral-900 px-1">
-                    <span>Custom Training Total ({livePricing.totalTrainingHours} hrs):</span>
+                    <span>
+                      Custom Training Total ({livePricing.totalTrainingHours}{" "}
+                      hrs):
+                    </span>
                     <span className="font-mono text-amber-900 text-sm">
                       {formatINR(livePricing.baseTrainingCost)}
                     </span>
@@ -716,7 +827,9 @@ export const PublicProposalViewPage: React.FC = () => {
                     >
                       <div className="flex items-start gap-2">
                         <CheckCircle2 className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-                        <span className="font-medium text-neutral-900">{mod.name}</span>
+                        <span className="font-medium text-neutral-900">
+                          {mod.name}
+                        </span>
                       </div>
                       <span className="font-mono text-neutral-500 font-semibold text-[11px] whitespace-nowrap">
                         {mod.hours}h
@@ -728,117 +841,131 @@ export const PublicProposalViewPage: React.FC = () => {
             </Card>
 
             {/* Custom Proposal Items */}
-            {livePricing?.computedCustomItems && livePricing.computedCustomItems.length > 0 && (
-              <Card className="space-y-4 border-purple-200/80 bg-purple-50/20">
-                <div className="flex items-center justify-between pb-3 border-b border-purple-100">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-purple-100 text-purple-900">
-                      <Package className="w-4 h-4" />
-                    </div>
-                    <h2 className="text-sm font-bold text-neutral-900">Custom Proposal Items</h2>
-                  </div>
-                  <span className="text-[10px] font-bold font-mono text-purple-800 bg-purple-100 px-2 py-0.5 rounded">
-                    Specialized Requirements
-                  </span>
-                </div>
-
-                <div className="space-y-2.5 pt-1">
-                  {livePricing.computedCustomItems.map((item, idx) => (
-                    <div
-                      key={idx}
-                      className="p-3.5 rounded-xl bg-white border border-purple-200/80 flex items-center justify-between gap-3 text-xs shadow-2xs"
-                    >
-                      <div>
-                        <span className="font-bold text-neutral-900 block">{item.name}</span>
-                        {item.description && (
-                          <p className="text-[10px] text-neutral-500 mt-0.5">{item.description}</p>
-                        )}
-                        <span className="text-[10px] text-purple-800 font-mono font-medium block mt-0.5">
-                          {item.pricingType === 'PER_STUDENT'
-                            ? `₹${item.unitPrice}/student (${item.quantity} students)`
-                            : `₹${item.unitPrice} × ${item.quantity}`}
-                        </span>
+            {livePricing?.computedCustomItems &&
+              livePricing.computedCustomItems.length > 0 && (
+                <Card className="space-y-4 border-purple-200/80 bg-purple-50/20">
+                  <div className="flex items-center justify-between pb-3 border-b border-purple-100">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-purple-100 text-purple-900">
+                        <Package className="w-4 h-4" />
                       </div>
-                      <span className="font-mono font-bold text-purple-950 text-sm">
-                        {formatINR(item.calculatedCost)}
-                      </span>
+                      <h2 className="text-sm font-bold text-neutral-900">
+                        Custom Proposal Items
+                      </h2>
                     </div>
-                  ))}
-                  <div className="pt-2 border-t border-purple-200 flex justify-between items-center text-xs font-bold text-neutral-900 px-1">
-                    <span>Custom Items Total:</span>
-                    <span className="font-mono text-purple-900 text-sm">
-                      {formatINR(livePricing.customItemsTotal)}
+                    <span className="text-[10px] font-bold font-mono text-purple-800 bg-purple-100 px-2 py-0.5 rounded">
+                      Specialized Requirements
                     </span>
                   </div>
-                </div>
-              </Card>
-            )}
+
+                  <div className="space-y-2.5 pt-1">
+                    {livePricing.computedCustomItems.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="p-3.5 rounded-xl bg-white border border-purple-200/80 flex items-center justify-between gap-3 text-xs shadow-2xs"
+                      >
+                        <div>
+                          <span className="font-bold text-neutral-900 block">
+                            {item.name}
+                          </span>
+                          {item.description && (
+                            <p className="text-[10px] text-neutral-500 mt-0.5">
+                              {item.description}
+                            </p>
+                          )}
+                          <span className="text-[10px] text-purple-800 font-mono font-medium block mt-0.5">
+                            {item.pricingType === "PER_STUDENT"
+                              ? `₹${item.unitPrice}/student (${item.quantity} students)`
+                              : `₹${item.unitPrice} × ${item.quantity}`}
+                          </span>
+                        </div>
+                        <span className="font-mono font-bold text-purple-950 text-sm">
+                          {formatINR(item.calculatedCost)}
+                        </span>
+                      </div>
+                    ))}
+                    <div className="pt-2 border-t border-purple-200 flex justify-between items-center text-xs font-bold text-neutral-900 px-1">
+                      <span>Custom Items Total:</span>
+                      <span className="font-mono text-purple-900 text-sm">
+                        {formatINR(livePricing.customItemsTotal)}
+                      </span>
+                    </div>
+                  </div>
+                </Card>
+              )}
 
             {/* Commercial Add-ons */}
-            {proposalData.availableAddons && proposalData.availableAddons.length > 0 && (
-              <Card className="space-y-4">
-                <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
-                  <div className="flex items-center gap-2">
-                    <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-800">
-                      <Sparkles className="w-4 h-4" />
-                    </div>
-                    <h2 className="text-sm font-bold text-neutral-900">Institutional Add-ons & Certifications</h2>
-                  </div>
-                  <span className="text-[11px] text-neutral-500">
-                    {selectedAddonIds.length} Selected
-                  </span>
-                </div>
-
-                <div className="space-y-3 pt-1">
-                  {proposalData.availableAddons.map((addon) => {
-                    const isSelected = selectedAddonIds.includes(addon.id);
-
-                    return (
-                      <div
-                        key={addon.id}
-                        onClick={() => handleAddonToggle(addon.id)}
-                        className={`p-4 rounded-xl border transition-all flex items-start justify-between gap-4 ${
-                          isSelected
-                            ? 'bg-amber-50/50 border-amber-400 shadow-xs'
-                            : 'bg-white border-neutral-200 hover:border-neutral-300'
-                        } ${!isLocked ? 'cursor-pointer' : 'cursor-default'}`}
-                      >
-                        <div className="flex items-start gap-3">
-                          <div
-                            className={`w-5 h-5 rounded-md border flex items-center justify-center mt-0.5 transition-colors ${
-                              isSelected
-                                ? 'bg-amber-500 border-amber-500 text-neutral-950'
-                                : 'border-neutral-300 bg-white'
-                            }`}
-                          >
-                            {isSelected && <Check className="w-3.5 h-3.5 font-bold" />}
-                          </div>
-                          <div className="space-y-1">
-                            <span className="text-xs font-bold text-neutral-900">{addon.name}</span>
-                            <p className="text-[11px] text-neutral-500 leading-relaxed">
-                              {addon.description}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex flex-col items-end text-right flex-shrink-0">
-                          <span className="text-xs font-bold font-mono text-neutral-900">
-                            {formatINR(addon.price)}
-                          </span>
-                          <span className="text-[10px] text-neutral-500">
-                            {addon.pricingType === 'PER_STUDENT'
-                              ? 'per student'
-                              : addon.pricingType === 'PER_HOUR'
-                              ? 'per hour'
-                              : 'flat fee'}
-                          </span>
-                        </div>
+            {proposalData.availableAddons &&
+              proposalData.availableAddons.length > 0 && (
+                <Card className="space-y-4">
+                  <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+                    <div className="flex items-center gap-2">
+                      <div className="p-1.5 rounded-lg bg-amber-500/10 text-amber-800">
+                        <Sparkles className="w-4 h-4" />
                       </div>
-                    );
-                  })}
-                </div>
-              </Card>
-            )}
+                      <h2 className="text-sm font-bold text-neutral-900">
+                        Institutional Add-ons & Certifications
+                      </h2>
+                    </div>
+                    <span className="text-[11px] text-neutral-500">
+                      {selectedAddonIds.length} Selected
+                    </span>
+                  </div>
+
+                  <div className="space-y-3 pt-1">
+                    {proposalData.availableAddons.map((addon) => {
+                      const isSelected = selectedAddonIds.includes(addon.id);
+
+                      return (
+                        <div
+                          key={addon.id}
+                          onClick={() => handleAddonToggle(addon.id)}
+                          className={`p-4 rounded-xl border transition-all flex items-start justify-between gap-4 ${
+                            isSelected
+                              ? "bg-amber-50/50 border-amber-400 shadow-xs"
+                              : "bg-white border-neutral-200 hover:border-neutral-300"
+                          } ${!isLocked ? "cursor-pointer" : "cursor-default"}`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`w-5 h-5 rounded-md border flex items-center justify-center mt-0.5 transition-colors ${
+                                isSelected
+                                  ? "bg-amber-500 border-amber-500 text-neutral-950"
+                                  : "border-neutral-300 bg-white"
+                              }`}
+                            >
+                              {isSelected && (
+                                <Check className="w-3.5 h-3.5 font-bold" />
+                              )}
+                            </div>
+                            <div className="space-y-1">
+                              <span className="text-xs font-bold text-neutral-900">
+                                {addon.name}
+                              </span>
+                              <p className="text-[11px] text-neutral-500 leading-relaxed">
+                                {addon.description}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="flex flex-col items-end text-right flex-shrink-0">
+                            <span className="text-xs font-bold font-mono text-neutral-900">
+                              {formatINR(addon.price)}
+                            </span>
+                            <span className="text-[10px] text-neutral-500">
+                              {addon.pricingType === "PER_STUDENT"
+                                ? "per student"
+                                : addon.pricingType === "PER_HOUR"
+                                  ? "per hour"
+                                  : "flat fee"}
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </Card>
+              )}
 
             {/* College Notes */}
             {!isLocked && (
@@ -863,8 +990,12 @@ export const PublicProposalViewPage: React.FC = () => {
               <Card className="border-amber-300/80 shadow-md bg-white space-y-5">
                 <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
                   <div>
-                    <h3 className="text-sm font-bold text-neutral-900">Commercial Investment Summary</h3>
-                    <p className="text-[10px] text-neutral-500">Transparent line-item breakdown</p>
+                    <h3 className="text-sm font-bold text-neutral-900">
+                      Commercial Investment Summary
+                    </h3>
+                    <p className="text-[10px] text-neutral-500">
+                      Transparent line-item breakdown
+                    </p>
                   </div>
                 </div>
 
@@ -905,13 +1036,17 @@ export const PublicProposalViewPage: React.FC = () => {
                     {livePricing.discountAmount > 0 && (
                       <div className="flex items-center justify-between text-emerald-800 font-semibold bg-emerald-50/80 px-2.5 py-1.5 rounded-lg border border-emerald-200">
                         <span>Institutional Subsidy / Discount:</span>
-                        <span className="font-mono font-bold">-{formatINR(livePricing.discountAmount)}</span>
+                        <span className="font-mono font-bold">
+                          -{formatINR(livePricing.discountAmount)}
+                        </span>
                       </div>
                     )}
 
                     <div className="flex items-center justify-between text-neutral-900 font-bold">
                       <span>Taxable Amount (Pre-GST):</span>
-                      <span className="font-mono">{formatINR(livePricing.taxableAmount)}</span>
+                      <span className="font-mono">
+                        {formatINR(livePricing.taxableAmount)}
+                      </span>
                     </div>
 
                     <div className="flex items-center justify-between text-amber-900 bg-amber-50/80 px-2.5 py-1.5 rounded-lg font-semibold border border-amber-200/60">
@@ -961,29 +1096,56 @@ export const PublicProposalViewPage: React.FC = () => {
 
                     <div className="space-y-1.5 text-[11px]">
                       <div className="flex justify-between">
-                        <span className="text-amber-800 font-medium">Approval Reference:</span>
-                        <span className="font-mono font-bold text-amber-950">{proposalData.digitalApproval.approvalId}</span>
+                        <span className="text-amber-800 font-medium">
+                          Approval Reference:
+                        </span>
+                        <span className="font-mono font-bold text-amber-950">
+                          {proposalData.digitalApproval.approvalId}
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-amber-800 font-medium">Approved By:</span>
-                        <span className="font-bold text-amber-950">{proposalData.digitalApproval.approvedByName || 'BD Manager'}</span>
+                        <span className="text-amber-800 font-medium">
+                          Approved By:
+                        </span>
+                        <span className="font-bold text-amber-950">
+                          {proposalData.digitalApproval.approvedByName ||
+                            "BD Manager"}
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-amber-800 font-medium">Role:</span>
-                        <span className="font-semibold text-amber-950">BD Manager</span>
+                        <span className="text-amber-800 font-medium">
+                          Role:
+                        </span>
+                        <span className="font-semibold text-amber-950">
+                          BD Manager
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-amber-800 font-medium">Approved On:</span>
-                        <span className="font-semibold text-amber-950">{formatDateTime(proposalData.digitalApproval.approvedAt)}</span>
+                        <span className="text-amber-800 font-medium">
+                          Approved On:
+                        </span>
+                        <span className="font-semibold text-amber-950">
+                          {formatDateTime(
+                            proposalData.digitalApproval.approvedAt,
+                          )}
+                        </span>
                       </div>
                       <div className="flex justify-between pt-1 border-t border-amber-200/60">
-                        <span className="text-amber-800 font-medium">Proposal Prepared By:</span>
-                        <span className="font-semibold text-amber-950">{proposalData.createdBy?.fullName || 'BD Executive'} (BD Executive)</span>
+                        <span className="text-amber-800 font-medium">
+                          Proposal Prepared By:
+                        </span>
+                        <span className="font-semibold text-amber-950">
+                          {proposalData.createdBy?.fullName || "BD Executive"}{" "}
+                          (BD Executive)
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-amber-800 font-medium">Document Integrity:</span>
+                        <span className="text-amber-800 font-medium">
+                          Document Integrity:
+                        </span>
                         <span className="font-semibold text-emerald-700 flex items-center gap-1">
-                          <Check className="w-3 h-3 text-emerald-600 stroke-[3]" /> Verified & Digitally Signed
+                          <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />{" "}
+                          Verified & Digitally Signed
                         </span>
                       </div>
                     </div>
@@ -1005,11 +1167,17 @@ export const PublicProposalViewPage: React.FC = () => {
 
                     <div className="space-y-1.5 text-[11px]">
                       <div className="flex justify-between">
-                        <span className="text-emerald-800 font-medium">Acceptance ID:</span>
-                        <span className="font-mono font-bold text-emerald-950">{proposalData.digitalAcceptance.acceptanceId}</span>
+                        <span className="text-emerald-800 font-medium">
+                          Acceptance ID:
+                        </span>
+                        <span className="font-mono font-bold text-emerald-950">
+                          {proposalData.digitalAcceptance.acceptanceId}
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-emerald-800 font-medium">Accepted Plan:</span>
+                        <span className="text-emerald-800 font-medium">
+                          Accepted Plan:
+                        </span>
                         <span className="font-bold text-emerald-950">
                           {isCustomPlan
                             ? `Custom Modular Plan (${livePricing?.totalTrainingHours || proposalData.totalHours} Hours)`
@@ -1017,23 +1185,40 @@ export const PublicProposalViewPage: React.FC = () => {
                         </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-emerald-800 font-medium">Cohort Sizing:</span>
-                        <span className="font-semibold text-emerald-950">{studentCount} Students</span>
+                        <span className="text-emerald-800 font-medium">
+                          Cohort Sizing:
+                        </span>
+                        <span className="font-semibold text-emerald-950">
+                          {studentCount} Students
+                        </span>
                       </div>
                       <div className="flex justify-between">
-                        <span className="text-emerald-800 font-medium">Accepted On:</span>
-                        <span className="font-semibold text-emerald-950">{formatDate(proposalData.digitalAcceptance.acceptedAt)}</span>
+                        <span className="text-emerald-800 font-medium">
+                          Accepted On:
+                        </span>
+                        <span className="font-semibold text-emerald-950">
+                          {formatDate(
+                            proposalData.digitalAcceptance.acceptedAt,
+                          )}
+                        </span>
                       </div>
                       {proposalData.digitalAcceptance.acceptedByName && (
                         <div className="flex justify-between">
-                          <span className="text-emerald-800 font-medium">Authorized Lead:</span>
-                          <span className="font-semibold text-emerald-950">{proposalData.digitalAcceptance.acceptedByName}</span>
+                          <span className="text-emerald-800 font-medium">
+                            Authorized Lead:
+                          </span>
+                          <span className="font-semibold text-emerald-950">
+                            {proposalData.digitalAcceptance.acceptedByName}
+                          </span>
                         </div>
                       )}
                       <div className="flex justify-between">
-                        <span className="text-emerald-800 font-medium">Document Integrity:</span>
+                        <span className="text-emerald-800 font-medium">
+                          Document Integrity:
+                        </span>
                         <span className="font-semibold text-emerald-700 flex items-center gap-1">
-                          <Check className="w-3 h-3 text-emerald-600 stroke-[3]" /> Verified
+                          <Check className="w-3 h-3 text-emerald-600 stroke-[3]" />{" "}
+                          Verified
                         </span>
                       </div>
                     </div>
@@ -1063,7 +1248,9 @@ export const PublicProposalViewPage: React.FC = () => {
                           setChangeError(null);
                           setIsRequestChangeOpen(true);
                         }}
-                        leftIcon={<MessageSquare className="w-3.5 h-3.5 text-amber-700" />}
+                        leftIcon={
+                          <MessageSquare className="w-3.5 h-3.5 text-amber-700" />
+                        }
                       >
                         Request Changes / Special Terms
                       </Button>
@@ -1075,7 +1262,8 @@ export const PublicProposalViewPage: React.FC = () => {
                         <span>Proposal Approved & Finalized</span>
                       </div>
                       <p className="text-[10px] text-emerald-700">
-                        Official MoU execution is underway with Genesis Academic Relations.
+                        Official MoU execution is underway with Genesis Academic
+                        Relations.
                       </p>
                     </div>
                   ) : (
@@ -1085,14 +1273,17 @@ export const PublicProposalViewPage: React.FC = () => {
                         <span>Submitted & Pending Manager Sign-off</span>
                       </div>
                       <p className="text-[10px] text-amber-800">
-                        Your proposal has been sent to the Genesis team for final approval.
+                        Your proposal has been sent to the Genesis team for
+                        final approval.
                       </p>
                     </div>
                   )}
 
                   <div className="flex items-center justify-center gap-1 text-[10px] text-neutral-500 pt-1">
                     <ShieldCheck className="w-3.5 h-3.5 text-amber-600" />
-                    <span>Cryptographically verified Genesis Institutional Document</span>
+                    <span>
+                      Cryptographically verified Genesis Institutional Document
+                    </span>
                   </div>
                 </div>
               </Card>
@@ -1111,52 +1302,84 @@ export const PublicProposalViewPage: React.FC = () => {
       >
         <div className="space-y-4 text-xs text-neutral-800">
           <p className="text-neutral-600 leading-relaxed">
-            Please review the commercial parameters below before digitally confirming this proposal sizing for final Genesis BD Manager sign-off.
+            Please review the commercial parameters below before digitally
+            confirming this proposal sizing for final Genesis BD Manager
+            sign-off.
           </p>
 
           <div className="p-4 rounded-xl bg-neutral-50 border border-neutral-200 space-y-2.5">
             <div className="flex justify-between">
-              <span className="text-neutral-500 font-medium">Student Cohort:</span>
-              <span className="font-mono font-bold text-neutral-900">{studentCount} Students</span>
+              <span className="text-neutral-500 font-medium">
+                Student Cohort:
+              </span>
+              <span className="font-mono font-bold text-neutral-900">
+                {studentCount} Students
+              </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-500 font-medium">Selected Plan:</span>
+              <span className="text-neutral-500 font-medium">
+                Selected Plan:
+              </span>
               <span className="font-bold text-neutral-900">
-                {isCustomPlan ? `Custom Modular Plan (${livePricing?.totalTrainingHours || proposalData.totalHours} hrs)` : proposalData.plan?.name}
+                {isCustomPlan
+                  ? `Custom Modular Plan (${livePricing?.totalTrainingHours || proposalData.totalHours} hrs)`
+                  : proposalData.plan?.name}
               </span>
             </div>
             {isCustomPlan && livePricing?.computedPrograms && (
               <div className="py-2 border-y border-neutral-200/80 space-y-1">
-                <span className="text-[10px] uppercase font-bold text-neutral-500">Configured Training Programs:</span>
+                <span className="text-[10px] uppercase font-bold text-neutral-500">
+                  Configured Training Programs:
+                </span>
                 {livePricing.computedPrograms.map((p, idx) => (
                   <div key={idx} className="flex justify-between text-[11px]">
-                    <span className="text-neutral-700">{p.name} ({p.hours} hrs @ {p.pricingType === 'PER_STUDENT' ? `₹${p.unitRate}/std` : `₹${p.unitRate}/hr`}):</span>
-                    <span className="font-mono font-semibold text-neutral-900">{formatINR(p.cost)}</span>
+                    <span className="text-neutral-700">
+                      {p.name} ({p.hours} hrs @{" "}
+                      {p.pricingType === "PER_STUDENT"
+                        ? `₹${p.unitRate}/std`
+                        : `₹${p.unitRate}/hr`}
+                      ):
+                    </span>
+                    <span className="font-mono font-semibold text-neutral-900">
+                      {formatINR(p.cost)}
+                    </span>
                   </div>
                 ))}
               </div>
             )}
             <div className="flex justify-between">
-              <span className="text-neutral-500 font-medium">Selected Add-ons:</span>
+              <span className="text-neutral-500 font-medium">
+                Selected Add-ons:
+              </span>
               <span className="font-semibold text-neutral-900">
                 {selectedAddonIds.length > 0
                   ? (proposalData.availableAddons || [])
                       .filter((a) => selectedAddonIds.includes(a.id))
                       .map((a) => a.name)
-                      .join(', ')
-                  : 'None'}
+                      .join(", ")
+                  : "None"}
               </span>
             </div>
             <div className="pt-2 border-t border-neutral-200 flex justify-between">
-              <span className="text-neutral-600 font-medium">Taxable Amount (Pre-GST):</span>
-              <span className="font-mono font-bold text-neutral-900">{formatINR(livePricing?.taxableAmount || 0)}</span>
+              <span className="text-neutral-600 font-medium">
+                Taxable Amount (Pre-GST):
+              </span>
+              <span className="font-mono font-bold text-neutral-900">
+                {formatINR(livePricing?.taxableAmount || 0)}
+              </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-neutral-600 font-medium">Goods & Services Tax (GST 18%):</span>
-              <span className="font-mono font-bold text-neutral-900">{formatINR(livePricing?.gstAmount || 0)}</span>
+              <span className="text-neutral-600 font-medium">
+                Goods & Services Tax (GST 18%):
+              </span>
+              <span className="font-mono font-bold text-neutral-900">
+                {formatINR(livePricing?.gstAmount || 0)}
+              </span>
             </div>
             <div className="pt-2 border-t-2 border-amber-400 flex justify-between bg-amber-500/10 -mx-4 -mb-4 p-3.5 rounded-b-xl">
-              <span className="font-extrabold text-neutral-950">Grand Total (Incl. GST):</span>
+              <span className="font-extrabold text-neutral-950">
+                Grand Total (Incl. GST):
+              </span>
               <span className="font-mono font-black text-amber-900 text-base">
                 {formatINR(livePricing?.grandTotal || 0)}
               </span>
@@ -1166,7 +1389,8 @@ export const PublicProposalViewPage: React.FC = () => {
           <div className="flex items-center gap-1.5 text-[11px] text-emerald-800 bg-emerald-50 p-2.5 rounded-lg border border-emerald-200 font-medium">
             <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
             <span>
-              By clicking "Confirm & Accept", a digitally verified acceptance record and cryptographic hash will be generated.
+              By clicking "Confirm & Accept", a digitally verified acceptance
+              record and cryptographic hash will be generated.
             </span>
           </div>
 
@@ -1226,7 +1450,10 @@ export const PublicProposalViewPage: React.FC = () => {
           </div>
 
           <p className="text-[11px] text-neutral-500 leading-relaxed">
-            Submitting this request will flag the proposal as <strong>Revisions Requested</strong> and immediately notify your assigned BD executive to update the curriculum, schedule, or pricing snapshot.
+            Submitting this request will flag the proposal as{" "}
+            <strong>Revisions Requested</strong> and immediately notify your
+            assigned BD executive to update the curriculum, schedule, or pricing
+            snapshot.
           </p>
 
           <div className="flex justify-end gap-3 pt-3 border-t border-neutral-100">
