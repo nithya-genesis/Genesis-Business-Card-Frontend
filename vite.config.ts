@@ -20,7 +20,7 @@ export default defineConfig({
 
     proxy: {
       "/api": {
-        target: "http://localhost:5001/",
+        target: "http://187.127.190.215:5001/",
         changeOrigin: true,
         secure: false,
       },
