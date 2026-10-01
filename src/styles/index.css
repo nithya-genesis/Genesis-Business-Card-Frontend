@@ -1,0 +1,76 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: #FFFFFF;
+    --foreground: #171717;
+    --border: #E8E4D8;
+    --ring: #D4A72C;
+  }
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+  background-color: #FAFAF7;
+  color: #171717;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Custom Clean Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #FAFAF7;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #DCD7C9;
+  border-radius: 9999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #B5891E;
+}
+
+/* Corporate Card & Panel utilities */
+.genesis-card {
+  background: #FFFFFF;
+  border: 1px solid #E8E4D8;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.genesis-card-interactive {
+  background: #FFFFFF;
+  border: 1px solid #E8E4D8;
+  border-radius: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.genesis-card-interactive:hover {
+  border-color: #D4A72C;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 25px rgba(212, 167, 44, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+/* Gold Gradient Accents */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #B5891E 0%, #D4A72C 50%, #906A17 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gold-gradient-bg {
+  background: linear-gradient(135deg, #D4A72C 0%, #B5891E 100%);
+}
+
+.gold-subtle-bg {
+  background: linear-gradient(135deg, #FDFBF7 0%, #FBF6E9 100%);
+}
