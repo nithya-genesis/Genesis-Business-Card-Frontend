@@ -11,10 +11,12 @@ export default defineConfig({
     },
   },
   server: {
-    port: 5173,
+    allowedHosts: ['proposals.genplusconsulting.com'],
+    port: 5200,
+    host: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'http://127.0.0.1:5001',
         changeOrigin: true,
       },
     },
